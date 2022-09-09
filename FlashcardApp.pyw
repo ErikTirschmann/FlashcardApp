@@ -74,7 +74,11 @@ def return_pressed(event = None):
 #------------------------------------------------------------------------------
 #
 def list_all_files(file_path):
-    return next(os.walk(file_path))[2]
+    files = next(os.walk(file_path))[2]
+    cleaned = []
+    for file in range(0, len(files)):
+        cleaned.append(files[file].replace('.txt', ''))
+    return cleaned
 
 ###############################################################################
 # Funktion: clear_content()
@@ -164,7 +168,7 @@ def db_create_input():
 #
 def db_create():
     if Path(db_folder).is_dir() and len(tb_question.get('1.0', 'end')) > 3:
-        file_name = os.path.join(db_folder, str.strip(tb_question.get('1.0', 'end')))
+        file_name = os.path.join(db_folder, str.strip(tb_question.get('1.0', 'end')) + '.txt')
         try:
             with open(file_name, 'x', encoding = 'utf-8') as f:
                 f.close()
@@ -184,13 +188,13 @@ def db_create():
 #
 def qu_create():
     if len(tb_answer.get('1.0', 'end')) > 3 and len(tb_question.get('1.0', 'end')) > 5:
-        file_name = os.path.join(db_folder, str.strip(cb_select_db.get()))
+        file_name = os.path.join(db_folder, str.strip(cb_select_db.get()) + '.txt')
         try:
             qust = str.strip(tb_question.get('1.0', 'end'))
             answ = str.strip(tb_answer.get('1.0', 'end')).replace('\n', ';;;')
             with open(file_name, 'r', encoding = 'utf-8') as f:
                 file_lines = f.readlines()
-            f.close()
+                f.close()
             for x in range(len(file_lines)):
                 if file_lines[x].split('###')[0] == qust:
                     tki.messagebox.showerror('Fehler', f'{qust} ist bereits in der Datenbank enthalten!')
@@ -212,7 +216,7 @@ def qu_create():
 #
 def db_remove():
     if cb_select_db.get() != '' and tki.messagebox.askquestion('Achtung', f'Möchten sie {cb_select_db.get()} wirklich unwiederruflich löschen?') == 'yes':
-        os.remove(os.path.join(db_folder, cb_select_db.get()))
+        os.remove(os.path.join(db_folder, cb_select_db.get() + '.txt'))
         cb_select_db.set('')
         cb_select_db['values'] = sorted(list_all_files(db_folder))
     else:
@@ -227,7 +231,7 @@ def db_remove():
 def qu_remove():
     if len(tb_question.get('1.0', 'end')) > 3 :
         if tki.messagebox.askquestion('Achtung', 'Möchten sie den Eintrag {0} wirklich entfernen?'.format(tb_question.get('1.0', 'end').strip())) == 'yes':
-            file_name = os.path.join(db_folder, str.strip(cb_select_db.get()))
+            file_name = os.path.join(db_folder, str.strip(cb_select_db.get() + '.txt'))
             with open(file_name, 'r', encoding = 'utf-8') as f:
                 file_lines = f.readlines()
                 f.close()
@@ -248,7 +252,7 @@ def qu_remove():
 #
 def qu_show():
     try:
-        file_name = os.path.join(db_folder, str.strip(cb_select_db.get()))
+        file_name = os.path.join(db_folder, str.strip(cb_select_db.get() + '.txt'))
         with open(file_name, 'r', encoding = 'utf-8') as f:
             file_lines = f.readlines()
             f.close()
@@ -277,7 +281,7 @@ def qu_show():
 #------------------------------------------------------------------------------
 #
 def an_show():
-    file_name = os.path.join(db_folder, str.strip(cb_select_db.get()))
+    file_name = os.path.join(db_folder, str.strip(cb_select_db.get() + '.txt'))
     with open(file_name, 'r', encoding = 'utf-8') as f:
         file_lines = f.readlines()
         f.close()
