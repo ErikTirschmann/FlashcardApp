@@ -21,14 +21,18 @@ font_tuple = ('Arial', 10)
 #------------------------------------------------------------------------------
 #
 def db_backup_files():
-    # vorherige Backups Entfernen
-    bk_files = list_all_files(db_backup)
-    for file in range(0, len(bk_files)):
-        os.remove(os.path.join(db_backup, bk_files[file]))
-    # Neue Backup dateien erstellen
-    db_files = list_all_files(db_folder)
-    for file in range(0, len(db_files)):
-        shutil.copyfile(os.path.join(db_folder, db_files[file]), os.path.join(db_backup, db_files[file]))
+    if Path(db_backup).is_dir():
+        # vorherige Backups Entfernen
+        bk_files = list_all_files(db_backup)
+        for file in range(0, len(bk_files)):
+            os.remove(os.path.join(db_backup, bk_files[file]))
+        # Neue Backup dateien erstellen
+        db_files = list_all_files(db_folder)
+        for file in range(0, len(db_files)):
+            shutil.copyfile(os.path.join(db_folder, db_files[file]), os.path.join(db_backup, db_files[file]))
+    else:
+        os.mkdir(db_backup)
+        db_backup_files()
 
 ###############################################################################
 # Funktion: db_showinfo()
@@ -74,11 +78,15 @@ def return_pressed(event = None):
 #------------------------------------------------------------------------------
 #
 def list_all_files(file_path):
-    files = next(os.walk(file_path))[2]
-    cleaned = []
-    for file in range(0, len(files)):
-        cleaned.append(files[file].replace('.txt', ''))
-    return cleaned
+    if Path(db_folder).is_dir():
+        files = next(os.walk(file_path))[2]
+        cleaned = []
+        for file in range(0, len(files)):
+            cleaned.append(files[file].replace('.txt', ''))
+        return cleaned
+    else:
+        os.mkdir(db_folder)
+        return []
 
 ###############################################################################
 # Funktion: clear_content()
