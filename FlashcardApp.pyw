@@ -63,10 +63,7 @@ def show_help():
 #
 def return_pressed(event = None):
     if event is None:
-        if str(bt_create_db['state']) == 'normal':
-            db_create()
-        elif str(bt_create_qu['state']) == 'normal':
-            qu_create()
+        return 'break'
 
 ###############################################################################
 # Funktion list_all_files()
@@ -255,7 +252,7 @@ def qu_remove():
 ###############################################################################
 # Funktion: qu_show()
 #------------------------------------------------------------------------------
-# Zeigt eine zufällige Frage im oberen Textfeld an
+# Zeigt eine zufällige Frage der gewählten Datenbank im oberen Textfeld an
 #------------------------------------------------------------------------------
 #
 def qu_show():
@@ -283,7 +280,7 @@ def qu_show():
         tki.messagebox.showerror('Fehler', 'Keine Datenbank ausgewählt!')
 
 ###############################################################################
-# Funktion: qn_show():
+# Funktion: an_show():
 #------------------------------------------------------------------------------
 # Zeigt die Antwort zur Frage im oberen Textfeld im unteren textfeld an
 #------------------------------------------------------------------------------
@@ -305,7 +302,7 @@ def an_show():
 if __name__ == '__main__':
     root = tki.Tk()
     ###########################################################################
-    # Fenster Proportionen und ausrichtung auf dem Bildschirm
+    # Fenster Proportionen und Ausrichtung auf dem Bildschirm
     #--------------------------------------------------------------------------
     #
     window_w = 550
@@ -319,11 +316,6 @@ if __name__ == '__main__':
     root.iconbitmap('Pictures/icon.ico')
     root.geometry(f'{window_w}x{window_h}+{center_x}+{center_y}')
     root.resizable(False, False)
-    ###########################################################################
-    # Verhalten der eingabestaste
-    #--------------------------------------------------------------------------
-    #
-    root.bind('<Return>', lambda e: return_pressed())
 
     ###########################################################################
     # Erstellen eines rasters auf dem Fenster
@@ -336,7 +328,7 @@ if __name__ == '__main__':
     root.columnconfigure(4, weight = 1) # Reihen für schmale Buttons
     root.columnconfigure(5, weight = 1) #
     ###########################################################################
-    # Platzuierung der Elemente auf dem rasters
+    # platzierung der Elemente auf dem Raster
     #--------------------------------------------------------------------------
     # Reihe 1: Datenbank auswahl
     #--------------------------------------------------------------------------
@@ -383,7 +375,6 @@ if __name__ == '__main__':
     #--------------------------------------------------------------------------
     #
     tb_question = tki.Text(root, height = 1, state = 'disabled')
-
     tb_question.grid(column = 0, row = 4, padx = 5, pady = 5, columnspan = 6, sticky = 'ew')
     tb_question.configure(font = font_tuple, background = '#eceff4')
     #--------------------------------------------------------------------------
@@ -411,5 +402,12 @@ if __name__ == '__main__':
     bt_help_fi.grid(column = 4, row = 6, padx = 0, pady = 5, sticky = 'e')
     bt_backup = ttk.Button(root, text = '☁', width = 5, command = db_backup_files)
     bt_backup.grid(column = 5, row = 6, padx = 5, pady = 5, sticky = 'e')
+    
+    ###########################################################################
+    # Verhindern dass bei Betätigen der Eingabetaste ein Zeilenwechsel im
+    # Textfeld der Frage stattfindet.
+    #--------------------------------------------------------------------------
+    #
+    tb_question.bind('<Return>', lambda e: return_pressed())
 
     root.mainloop()
