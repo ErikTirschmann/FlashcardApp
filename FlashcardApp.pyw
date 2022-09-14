@@ -245,6 +245,7 @@ def qu_show():
         clear_and_lock(tb_answer)
         clear_content(tb_question)
         tb_question.insert('1.0', question)
+        tb_question.configure(background = disabled_color)
         tb_question['state'] = 'disabled'
     except FileNotFoundError:
         tki.messagebox.showerror('Fehler', 'Keine Datenbank ausgewählt!')
@@ -258,6 +259,7 @@ def an_show():
             parts = line.split('###')[1].strip().split(';;;')
             for part in parts:
                 tb_answer.insert('1.0', part + '\n')
+            tb_answer.configure(background = disabled_color)
             tb_answer['state'] = 'disabled'
 
 ###############################################################################
