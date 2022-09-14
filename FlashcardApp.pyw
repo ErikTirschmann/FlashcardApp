@@ -13,9 +13,11 @@ db_backup = 'Backup'
 
 font_tuple = ('Arial', 10)
 
-disabled_color = '#eceff4'
+disabled_color = '#F2F3F5'
 enabled_color = '#ffffff'
 
+color_r = '#FF6E4A'
+color_g = '#A8E4A0'
 
 ###############################################################################
 # help and support functions
@@ -306,11 +308,11 @@ def db_button_lock():
     if str(bt_create_db['state']) == 'disabled':
         if tki.messagebox.askquestion('Warnung', 'Möchte sie wirklich die Datenbanken bearbeiten?') == 'yes':
             bt_create_db['state'] = bt_remove_db['state'] = bt_accept_db['state'] = 'normal'
-            lb_database.config(background = '#bf616a')
+            lb_database.config(background = color_r)
             tb_question['state'] = tb_answer['state'] = 'disabled'
     else:
         bt_create_db['state'] = bt_remove_db['state'] = bt_accept_db['state'] = 'disabled'
-        lb_database.config(background = '#a3be8c')
+        lb_database.config(background = color_g)
 
 def qu_button_lock():
     """Lock all buttons for question modification."""
@@ -320,10 +322,10 @@ def qu_button_lock():
     if str(bt_create_qu['state']) == 'disabled':
         if tki.messagebox.askquestion('Warnung', 'Möchten sie wirklich die Fragen bearbeiten?') == 'yes':
             bt_create_qu['state'] = bt_remove_qu['state'] = bt_accept_qu['state'] = 'normal'
-            lb_question.config(background = '#bf616a')
+            lb_question.config(background = color_r)
     else:
         bt_create_qu['state'] = bt_remove_qu['state'] = bt_accept_qu['state'] = 'disabled'
-        lb_question.config(background = '#a3be8c')
+        lb_question.config(background = color_g)
         clear_and_lock(tb_question)
         clear_and_lock(tb_answer)
 
@@ -379,7 +381,7 @@ if __name__ == '__main__':
     bt_remove_db.grid(column = 1, row = 2, padx = 0, pady = 5, sticky = 'w')
     bt_accept_db = ttk.Button(root, text = "Bestätigen", width = 15, state = 'disabled', command = db_create)
     bt_accept_db.grid(column = 2, row = 2, padx = 5, pady = 5, sticky = 'w')
-    lb_database = ttk.Label(root, text = 'Datenbank', width = 35, borderwidth = 3, anchor = 'center', relief = 'sunken', background = '#a3be8c')
+    lb_database = ttk.Label(root, text = 'Datenbank', width = 35, borderwidth = 3, anchor = 'center', relief = 'sunken', background = color_g)
     lb_database.grid(column = 3, row = 2, padx = 5, pady = 5, ipady = 3, sticky = 'e')
     bt_help_db = ttk.Button(root, text = '⌘', width = 5, command = db_showinfo)
     bt_help_db.grid(column = 4, row = 2, padx = 0, pady = 5, sticky = 'e')
@@ -393,7 +395,7 @@ if __name__ == '__main__':
     bt_remove_qu.grid(column = 1, row = 3, padx = 0, pady = 5, sticky = 'w')
     bt_accept_qu = ttk.Button(root, text = "Bestätigen", width = 15, state = 'disabled', command = qu_create)
     bt_accept_qu.grid(column = 2, row = 3, padx = 5, pady = 5, sticky = 'w')
-    lb_question = ttk.Label(root, text = 'Fragen', width = 35, anchor = 'center', borderwidth = 3, relief = 'sunken', background = '#a3be8c')
+    lb_question = ttk.Label(root, text = 'Fragen', width = 35, anchor = 'center', borderwidth = 3, relief = 'sunken', background = color_g)
     lb_question.grid(column = 3, row = 3, padx = 5, pady = 5, ipady = 3, sticky = 'e')
     bt_help_qu = ttk.Button(root, text = '⌘', width = 5, command = qu_showinfo)
     bt_help_qu.grid(column = 4, row = 3, padx = 0, pady = 5, sticky = 'e')
@@ -403,7 +405,7 @@ if __name__ == '__main__':
     # row 4: question textbox
     tb_question = tki.Text(root, height = 1, state = 'disabled', borderwidth = 3, relief = 'groove')
     tb_question.grid(column = 0, row = 4, padx = 5, pady = 5, columnspan = 6, sticky = 'ew')
-    tb_question.configure(font = font_tuple, background = '#eceff4')
+    tb_question.configure(font = font_tuple, background = disabled_color)
     ###########################################################################
     # row 5: answer textbox
     tbs_frame = tki.Frame(root)
@@ -411,7 +413,7 @@ if __name__ == '__main__':
     tbs_frame.grid(column = 0, row = 5, padx = 5, pady = 5, columnspan = 6, sticky = 'ew')
     tb_answer = tki.Text(tbs_frame, height = 10, wrap = 'word', state = 'disabled', borderwidth = 3, relief = 'groove')
     tb_answer.grid(column = 0, row = 0, padx = 0, pady = 0, sticky = 'ew')
-    tb_answer.configure(font = font_tuple, background = '#eceff4')
+    tb_answer.configure(font = font_tuple, background = disabled_color)
     sb_answer = ttk.Scrollbar(tbs_frame, orient = 'vertical', command = tb_answer.yview)
     sb_answer.grid(column = 1, row = 0, padx = 0, pady = 0, sticky = 'nse')
     tb_answer['yscrollcommand'] = sb_answer.set
