@@ -1,4 +1,3 @@
-import cryptocode
 import os
 import random
 import shutil
@@ -11,8 +10,6 @@ from tkinter.messagebox import showinfo
 
 db_folder = 'Database'
 db_backup = 'Backup'
-
-keyword = 'bananna'
 
 font_tuple = ('Arial', 10)
 
@@ -159,22 +156,6 @@ def create_file(file_name):
     with open(file_name, 'x', encoding = 'utf-8') as f:
         f.close()
 
-def decode(lines):
-    """
-    """
-    lines_d = []
-    for line in lines:
-        lines_d.append(cryptocode.decrypt(line, keyword))
-    return lines_d
-
-def encode(lines):
-    """
-    """
-    lines_e = []
-    for line in lines:
-        lines_e.append(cryptocode.encrypt(line, keyword) + '\n')
-    return lines_e
-
 def read_lines(file):
     """Return the lines of a textfile.
 
@@ -186,7 +167,7 @@ def read_lines(file):
     with open(file, 'r', encoding = 'utf-8') as f:
         lines = f.readlines()
         f.close()
-        return decode(lines)
+        return lines
 
 def write_lines(file, lines):
     """Write a list of lines to a file.
@@ -195,7 +176,7 @@ def write_lines(file, lines):
         lines: list of lines
     """
     with open(file, 'w', encoding = 'utf-8') as f:
-        f.writelines(encode(lines))
+        f.writelines(lines)
         f.close()
 
 def already_used(lines, value):
