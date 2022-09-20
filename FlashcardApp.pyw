@@ -355,7 +355,7 @@ if __name__ == '__main__':
     center_y = int(screen_h / 2 - window_h / 2)
 
     root.title('Flashcards')
-    root.iconbitmap('Pictures/icon.ico')
+    root.iconbitmap('Pictures/fc.ico')
     root.geometry(f'{window_w}x{window_h}+{center_x}+{center_y}')
     root.resizable(False, False)
     ###########################################################################
