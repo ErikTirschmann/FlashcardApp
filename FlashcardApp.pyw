@@ -250,9 +250,8 @@ def an_show():
     for line in read_lines(file):
         if line.startswith(tb_question.get('1.0', 'end').strip()):
             clear_content(tb_answer)
-            parts = line.split('###')[1].strip().split(';;;')
-            for part in parts:
-                tb_answer.insert('1.0', part + '\n')
+            answer = line.split('###')[1].strip().replace(';;;', '\n')
+            tb_answer.insert('1.0', answer)
             tb_answer.configure(background = tb_color_ds)
             tb_answer['state'] = 'disabled'
 
