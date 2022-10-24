@@ -11,26 +11,18 @@ from tkinter.messagebox import showinfo
 db_folder = 'Database'
 db_backup = 'Backup'
 
-font_tuple = ('Arial', 10)
+tb_color_ds = '#F2F3F5'     # bg-color of the disabled textbox
+tb_color_en = '#ffffff'     # bg-color of the enabled textbox
+lb_color_rd = '#FF6E4A'     # bg-color of the red label (db and questions)
+lb_color_gn = '#A8E4A0'     # bg-color of the green label (db and questions)
+fr_color_db = '#E5E4E2'     # bg-color of the frames
 
-disabled_color = '#F2F3F5'
-enabled_color = '#ffffff'
-
-color_r = '#FF6E4A'
-color_g = '#A8E4A0'
+font_tuple = ('Arial', 10)  # font for the question / answer textbox
 
 ###############################################################################
 # help and support functions
 #------------------------------------------------------------------------------
 #
-def db_showinfo():
-    """Show a guide for the database buttons."""
-    tki.messagebox.showinfo('Info', '[Button Erstellen]\n\nAktiviert das obere Textfeld um die Eingabe eines Datenbanknamens zu ermöglichen.\n\n\n[Button Bestätigen]\n\nVersucht eine Datenbank zu erstellen die den im oberen Textfeld angegebenen Namen trägt.\n\n\n[Button Entfernen]\n\nEntfernt die momentan aktivierte Datenbank.')
-
-def qu_showinfo():
-    """Show a guide for the question buttons."""
-    tki.messagebox.showinfo('Info', '[Button Erstellen]\n\nAktiviert das obere und untere Textfeld um die Eingabe einer Frage / Antwort Kombination zu ermöglichen.\n\n\n[Button bestätigen]\n\nVersucht eine Fragen / Antwort Kombination in die momentan aktive Datenbank zu schreiben.\n\n\n[Button Entfernen]\n\nEntfernt die derzeitige Frage / Antwort Kombination aus der momentan aktiven Datenbank.')
-
 def show_help():
     """Open help pdf in the default application of os."""
     os.startfile('FlashcardApp - Hilfe.pdf')
@@ -247,7 +239,7 @@ def qu_show():
         clear_and_lock(tb_answer)
         clear_content(tb_question)
         tb_question.insert('1.0', question)
-        tb_question.configure(background = disabled_color)
+        tb_question.configure(background = tb_color_ds)
         tb_question['state'] = 'disabled'
     except FileNotFoundError:
         tki.messagebox.showerror('Fehler', 'Keine Datenbank ausgewählt!')
@@ -261,13 +253,44 @@ def an_show():
             parts = line.split('###')[1].strip().split(';;;')
             for part in parts:
                 tb_answer.insert('1.0', part + '\n')
-            tb_answer.configure(background = disabled_color)
+            tb_answer.configure(background = tb_color_ds)
             tb_answer['state'] = 'disabled'
 
 ###############################################################################
 # surface-interactions
 #------------------------------------------------------------------------------
 #
+def hide_buttons():
+    """Hide the database and question buttons.
+    """
+    db_button_fr.grid_remove()
+    update_winsize()
+
+def show_buttons():
+    """Show the database and question buttons.
+    """
+    db_button_fr.grid()
+    update_winsize()
+
+def toggle_buttons():
+    """Enable / disable the database and question buttons
+    """
+    print(db_button_fr.winfo_ismapped())
+    if db_button_fr.winfo_ismapped() == 1:
+        hide_buttons()
+        bt_toggle.configure(text = '⇊')
+    else:
+        show_buttons()
+        bt_toggle.configure(text = '⇈')
+
+def update_winsize():
+    """Update the size of the window
+    """
+    root.update_idletasks()
+    window_w = 550
+    window_h = root.winfo_reqheight()
+    root.geometry(f'{window_w}x{window_h}')
+
 def clear_content(_object):
     """Clear the text value.
 
@@ -276,7 +299,7 @@ def clear_content(_object):
     """
     _object['state'] = 'normal'
     _object.delete('1.0', 'end')
-    _object.configure(background = enabled_color)
+    _object.configure(background = tb_color_en)
 
 def clear_and_lock(_object):
     """Clear the text value and set the object to read only.
@@ -286,7 +309,7 @@ def clear_and_lock(_object):
     """
     clear_content(_object)
     _object['state'] = 'disabled'
-    _object.configure(background = disabled_color)
+    _object.configure(background = tb_color_ds)
 
 def clear_content_b():
     """Clear both textboxes."""
@@ -308,11 +331,11 @@ def db_button_lock():
     if str(bt_create_db['state']) == 'disabled':
         if tki.messagebox.askquestion('Warnung', 'Möchte sie wirklich die Datenbanken bearbeiten?') == 'yes':
             bt_create_db['state'] = bt_remove_db['state'] = bt_accept_db['state'] = 'normal'
-            lb_database.config(background = color_r)
+            lb_database.config(background = lb_color_rd)
             tb_question['state'] = tb_answer['state'] = 'disabled'
     else:
         bt_create_db['state'] = bt_remove_db['state'] = bt_accept_db['state'] = 'disabled'
-        lb_database.config(background = color_g)
+        lb_database.config(background = lb_color_gn)
 
 def qu_button_lock():
     """Lock all buttons for question modification."""
@@ -322,10 +345,10 @@ def qu_button_lock():
     if str(bt_create_qu['state']) == 'disabled':
         if tki.messagebox.askquestion('Warnung', 'Möchten sie wirklich die Fragen bearbeiten?') == 'yes':
             bt_create_qu['state'] = bt_remove_qu['state'] = bt_accept_qu['state'] = 'normal'
-            lb_question.config(background = color_r)
+            lb_question.config(background = lb_color_rd)
     else:
         bt_create_qu['state'] = bt_remove_qu['state'] = bt_accept_qu['state'] = 'disabled'
-        lb_question.config(background = color_g)
+        lb_question.config(background = lb_color_gn)
         clear_and_lock(tb_question)
         clear_and_lock(tb_answer)
 
@@ -345,10 +368,111 @@ def qu_create_input():
 #
 if __name__ == '__main__':
     root = tki.Tk()
+
+    root.columnconfigure(0, weight = 1)
+
+    """line 1: combobox
+
+        list all files inside the database folder, select select a file
+    """
+    sv_select_db = tki.StringVar()
+    cb_select_db = ttk.Combobox(root, textvariable = sv_select_db)
+    cb_select_db['values'] = show_files(db_folder)
+    cb_select_db['state'] = 'readonly'
+    cb_select_db.grid(column = 0, row = 0, padx = 5, pady = 5, sticky = 'ew')
+
+    """line 2 + 3: button-frame
+
+        a frame to place the database and question buttons on the grid
+    """
+    db_button_fr = tki.Frame(root, borderwidth = 1, relief = 'sunken', background = fr_color_db)
+    db_button_fr.grid(column = 0, row = 1, padx = 5, pady = 0, sticky = 'ew')
+
+    db_button_fr.columnconfigure(0, weight = 1)
+    db_button_fr.columnconfigure(1, weight = 1)
+    db_button_fr.columnconfigure(2, weight = 1)
+    db_button_fr.columnconfigure(3, weight = 2)
+    db_button_fr.columnconfigure(4, weight = 1)
+
+    """line 2: database buttons
+
+        create and remove databases, label, lock buttons
+    """
+    bt_create_db = ttk.Button(db_button_fr, text = 'Erstellen', width = 15, state = 'disabled', command = db_create_input)
+    bt_create_db.grid(column = 0, row = 0, padx = 5, pady = 5)
+    bt_remove_db = ttk.Button(db_button_fr, text = 'Entfernen', width = 15, state = 'disabled', command = db_remove)
+    bt_remove_db.grid(column = 1, row = 0, padx = 0, pady = 5)
+    bt_accept_db = ttk.Button(db_button_fr, text = "Bestätigen", width = 15, state = 'disabled', command = db_create)
+    bt_accept_db.grid(column = 2, row = 0, padx = 5, pady = 5)
+    lb_database = ttk.Label(db_button_fr, text = 'Datenbank', width = 30, borderwidth = 3, anchor = 'center', relief = 'sunken', background = lb_color_gn)
+    lb_database.grid(column = 3, row = 0, padx = 0, pady = 5, ipady = 3)
+    bt_lock_db = ttk.Button(db_button_fr, text = '🕱', width = 3, command = db_button_lock)
+    bt_lock_db.grid(column = 5, row = 0, padx = 5, pady = 5)
+
+    """line 3: question-buttons
+
+        create and remove question, label, lock buttons
+    """
+    bt_create_qu = ttk.Button(db_button_fr, text = 'Erstellen', width = 15, state = 'disabled', command = qu_create_input)
+    bt_create_qu.grid(column = 0, row = 1, padx = 5, pady = 5)
+    bt_remove_qu = ttk.Button(db_button_fr, text = 'Entfernen', width = 15, state = 'disabled', command = qu_remove)
+    bt_remove_qu.grid(column = 1, row = 1, padx = 0, pady = 5)
+    bt_accept_qu = ttk.Button(db_button_fr, text = "Bestätigen", width = 15, state = 'disabled', command = qu_create)
+    bt_accept_qu.grid(column = 2, row = 1, padx = 5, pady = 5)
+    lb_question = ttk.Label(db_button_fr, text = 'Fragen', width = 30, anchor = 'center', borderwidth = 3, relief = 'sunken', background = lb_color_gn)
+    lb_question.grid(column = 3, row = 1, padx = 0, pady = 5, ipady = 3)
+    bt_lock_qu = ttk.Button(db_button_fr, text = '🕱', width = 3, command = qu_button_lock)
+    bt_lock_qu.grid(column = 5, row = 1, padx = 5, pady = 5)
+
+    """line 4: question-textbox
+    """
+    tb_question = tki.Text(root, height = 1, state = 'disabled', borderwidth = 1, relief = 'sunken')
+    tb_question.grid(column = 0, row = 4, padx = 5, pady = 5, ipadx = 5, sticky = 'ew')
+    tb_question.configure(font = font_tuple, background = tb_color_ds)
+
+    """line 5: answer-textbox
+    """
+    tbs_frame = tki.Frame(root)
+    tbs_frame.grid(column = 0, row = 5, padx = 5, pady = 0, columnspan = 6, sticky = 'ew')
+    tbs_frame.columnconfigure(0, weight = 1)
+
+    tb_answer = tki.Text(tbs_frame, height = 10, wrap = 'word', state = 'disabled', borderwidth = 1, relief = 'sunken')
+    tb_answer.grid(column = 0, row = 0, padx = 0, pady = 0, ipadx = 5, sticky = 'ew')
+    tb_answer.configure(font = font_tuple, background = tb_color_ds)
+    sb_answer = ttk.Scrollbar(tbs_frame, orient = 'vertical', command = tb_answer.yview)
+    sb_answer.grid(column = 1, row = 0, padx = 0, pady = 0, sticky = 'nse')
+    tb_answer['yscrollcommand'] = sb_answer.set
+
+    """ line 6: controll-buttons
+
+        show question, show answer, help, backup
+    """
+    cn_button_fr = tki.Frame(root, borderwidth = 1, relief = 'sunken', background = fr_color_db)
+    cn_button_fr.grid(column = 0, row = 6, padx = 5, pady = 5, sticky = 'ew')
+
+    cn_button_fr.columnconfigure(0, weight = 1)
+
+    bt_next = ttk.Button(cn_button_fr, text = 'Frage', width = 15, command = qu_show)
+    bt_next.grid(column = 0, row = 0, padx = 5, pady = 5, sticky = 'w')
+    bt_answer = ttk.Button(cn_button_fr, text = 'Antwort', width = 15, command = an_show)
+    bt_answer.grid(column = 1, row = 0, padx = 0, pady = 5, sticky = 'w')
+    lb_infotx = ttk.Label(cn_button_fr, text = 'FlashCards 2.2 by Erik Tirschmann', width = 37, anchor = 'center', background = fr_color_db)
+    lb_infotx.grid(column = 2, row = 0, padx = 5, pady = 5, ipady = 0)
+    bt_help_fi = ttk.Button(cn_button_fr, text = '？', width = 3, command = show_help)
+    bt_help_fi.grid(column = 3, row = 0, padx = 0, pady = 5, sticky = 'e')
+    bt_backup = ttk.Button(cn_button_fr, text = '☁', width = 3, command = create_backup)
+    bt_backup.grid(column = 4, row = 0, padx = 5, pady = 5, sticky = 'e')
+    bt_toggle = ttk.Button(cn_button_fr, text = '⇊', width = 3, command = toggle_buttons)
+    bt_toggle.grid(column = 5, row = 0, padx = 0, pady = 5, sticky = 'e')
+    # hotfixes
+    tb_question.bind('<Return>', lambda e: return_hotfix())
+    cb_select_db.bind('<<ComboboxSelected>>', lambda e: combobox_hotfix())
+
     ###########################################################################
     # window settings
+    root.update_idletasks()
     window_w = 550
-    window_h = 350
+    window_h = root.winfo_reqheight()
     screen_w = root.winfo_screenwidth()
     screen_h = root.winfo_screenheight()
     center_x = int(screen_w / 2 - window_w / 2)
@@ -358,78 +482,7 @@ if __name__ == '__main__':
     root.iconbitmap('Pictures/fc.ico')
     root.geometry(f'{window_w}x{window_h}+{center_x}+{center_y}')
     root.resizable(False, False)
-    ###########################################################################
-    # grid settings
-    root.columnconfigure(0, weight = 1) # wide buttons
-    root.columnconfigure(1, weight = 1) # *
-    root.columnconfigure(2, weight = 1) # *
-    root.columnconfigure(3, weight = 2) # labels
-    root.columnconfigure(4, weight = 1) # slim buttons
-    root.columnconfigure(5, weight = 1) # *
-    ###########################################################################
-    # row 1: database selection
-    sv_select_db = tki.StringVar()
-    cb_select_db = ttk.Combobox(root, textvariable = sv_select_db)
-    cb_select_db['values'] = show_files(db_folder)
-    cb_select_db['state'] = 'readonly'
-    cb_select_db.grid(column = 0, row = 1, padx = 5, pady = 5, columnspan = 6, sticky = 'ew')
-    ###########################################################################
-    # row 2: database handling
-    bt_create_db = ttk.Button(root, text = 'Erstellen', width = 15, state = 'disabled', command = db_create_input)
-    bt_create_db.grid(column = 0, row = 2, padx = 5, pady = 5, sticky = 'w')
-    bt_remove_db = ttk.Button(root, text = 'Entfernen', width = 15, state = 'disabled', command = db_remove)
-    bt_remove_db.grid(column = 1, row = 2, padx = 0, pady = 5, sticky = 'w')
-    bt_accept_db = ttk.Button(root, text = "Bestätigen", width = 15, state = 'disabled', command = db_create)
-    bt_accept_db.grid(column = 2, row = 2, padx = 5, pady = 5, sticky = 'w')
-    lb_database = ttk.Label(root, text = 'Datenbank', width = 35, borderwidth = 3, anchor = 'center', relief = 'sunken', background = color_g)
-    lb_database.grid(column = 3, row = 2, padx = 5, pady = 5, ipady = 3, sticky = 'e')
-    bt_help_db = ttk.Button(root, text = '⌘', width = 5, command = db_showinfo)
-    bt_help_db.grid(column = 4, row = 2, padx = 0, pady = 5, sticky = 'e')
-    bt_lock_db = ttk.Button(root, text = '🕱', width = 5, command = db_button_lock)
-    bt_lock_db.grid(column = 5, row = 2, padx = 5, pady = 5, sticky = 'e')
-    ###########################################################################
-    # row 3: question handling
-    bt_create_qu = ttk.Button(root, text = 'Erstellen', width = 15, state = 'disabled', command = qu_create_input)
-    bt_create_qu.grid(column = 0, row = 3, padx = 5, pady = 5, sticky = 'w')
-    bt_remove_qu = ttk.Button(root, text = 'Entfernen', width = 15, state = 'disabled', command = qu_remove)
-    bt_remove_qu.grid(column = 1, row = 3, padx = 0, pady = 5, sticky = 'w')
-    bt_accept_qu = ttk.Button(root, text = "Bestätigen", width = 15, state = 'disabled', command = qu_create)
-    bt_accept_qu.grid(column = 2, row = 3, padx = 5, pady = 5, sticky = 'w')
-    lb_question = ttk.Label(root, text = 'Fragen', width = 35, anchor = 'center', borderwidth = 3, relief = 'sunken', background = color_g)
-    lb_question.grid(column = 3, row = 3, padx = 5, pady = 5, ipady = 3, sticky = 'e')
-    bt_help_qu = ttk.Button(root, text = '⌘', width = 5, command = qu_showinfo)
-    bt_help_qu.grid(column = 4, row = 3, padx = 0, pady = 5, sticky = 'e')
-    bt_lock_qu = ttk.Button(root, text = '🕱', width = 5, command = qu_button_lock)
-    bt_lock_qu.grid(column = 5, row = 3, padx = 5, pady = 5, sticky = 'e')
-    ###########################################################################
-    # row 4: question textbox
-    tb_question = tki.Text(root, height = 1, state = 'disabled', borderwidth = 3, relief = 'groove')
-    tb_question.grid(column = 0, row = 4, padx = 5, pady = 5, columnspan = 6, sticky = 'ew')
-    tb_question.configure(font = font_tuple, background = disabled_color)
-    ###########################################################################
-    # row 5: answer textbox
-    tbs_frame = tki.Frame(root)
-    tbs_frame.columnconfigure(0, weight = 1) # Reihe für Textbox und Scrollbar
-    tbs_frame.grid(column = 0, row = 5, padx = 5, pady = 5, columnspan = 6, sticky = 'ew')
-    tb_answer = tki.Text(tbs_frame, height = 10, wrap = 'word', state = 'disabled', borderwidth = 3, relief = 'groove')
-    tb_answer.grid(column = 0, row = 0, padx = 0, pady = 0, sticky = 'ew')
-    tb_answer.configure(font = font_tuple, background = disabled_color)
-    sb_answer = ttk.Scrollbar(tbs_frame, orient = 'vertical', command = tb_answer.yview)
-    sb_answer.grid(column = 1, row = 0, padx = 0, pady = 0, sticky = 'nse')
-    tb_answer['yscrollcommand'] = sb_answer.set
-    ###########################################################################
-    # row 6: question/answer handling, help, backup
-    bt_next = ttk.Button(root, text = 'Frage', width = 15, command = qu_show)
-    bt_next.grid(column = 0, row = 6, padx = 5, pady = 5, sticky = 'w')
-    bt_answer = ttk.Button(root, text = 'Antwort', width = 15, command = an_show)
-    bt_answer.grid(column = 1, row = 6, padx = 0, pady = 5, sticky = 'w')
-    bt_help_fi = ttk.Button(root, text = '？', width = 5, command = show_help)
-    bt_help_fi.grid(column = 4, row = 6, padx = 0, pady = 5, sticky = 'e')
-    bt_backup = ttk.Button(root, text = '☁', width = 5, command = create_backup)
-    bt_backup.grid(column = 5, row = 6, padx = 5, pady = 5, sticky = 'e')
-    ###########################################################################
-    # hotfixes
-    tb_question.bind('<Return>', lambda e: return_hotfix())
-    cb_select_db.bind('<<ComboboxSelected>>', lambda e: combobox_hotfix())
+
+    hide_buttons()
 
     root.mainloop()
